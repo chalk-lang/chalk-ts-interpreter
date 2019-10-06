@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "newLine": "lf",
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./out",
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "strict": true,
+  }
+}
