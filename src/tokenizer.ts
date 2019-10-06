@@ -2,7 +2,41 @@
   Tokenizer for the Chalk programming language.
 /*/
 
-export function* tokenizer(str : string, isChalkDoc : boolean) {
+interface SimpleToken {
+  type: "comptime" | "import" | "ignore" | "nowait" | "switch" | "class" | "trait"
+    | "await" | "type" | "case" | "mut" | "let" | "cst" | "imt" | "any" | "<=>"
+    | "**=" | "<->" | "=>" | "[]" | "||" | "&&" | "==" | "!=" | "<=" | ">=" | "is"
+    | "++" | "**" | "+=" | "-=" | "*=" | "/=" | "%=" | "<-" | "->" | ";" | "="
+    | "(" | ")" | "{" | "}" | "<" | ">" | "|" | "&" | "*" | "." | "," | "?" | ":"
+    | "%" | "+" | "-" | "/" | "!" | "[" | "]";
+  row: number;
+  col: number;
+}
+
+interface NamedToken {
+  type: "break" | "continue" | "for" | "return" | "lIdentifier" | "uIdentifier";
+  row: number;
+  col: number;
+  name: string;
+}
+
+interface StringToken {
+  type: "string";
+  row: number;
+  col: number;
+  value: string;
+}
+
+interface NumberToken {
+  type: "number";
+  row: number;
+  col: number;
+  value: number;
+}
+
+type Token = SimpleToken | NamedToken | StringToken | NumberToken;
+
+export function* tokenizer(str : string, isChalkDoc : boolean) : Token {
   let rowCount = 0;
   let rowStart = 0;
   let i = 0;
