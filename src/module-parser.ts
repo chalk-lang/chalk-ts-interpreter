@@ -1,15 +1,20 @@
 /*/
   Exports a function that parses a single Chalk module.
+  
+  Probably deprecated and will be replaced by `./parser.js`.
 /*/
 
-import { tokenizer } from "./tokenizer";
-import { Module, IdentifierToLink } from "./chalk-ir";
+/*/
+import { tokenizer, Token } from "./tokenizer";
+import { Module } from "./chalk-ir";
 
-function unexpected(token) {
-  throw new Error("Unexpected token: ", token);
+function unexpected(token: Token): never {
+  console.log(("Unexpected token:"));
+  console.log(token);
+  throw new Error("Unexpected token.");
 }
 
-export function parse(path : string, str : string, isChalkDoc : boolean) {
+export function parse(path: string, str: string, isChalkDoc: boolean): Module {
   const tokens = tokenizer(str, isChalkDoc);
   const module = new Module(path);
   
@@ -19,12 +24,12 @@ export function parse(path : string, str : string, isChalkDoc : boolean) {
     token = parseImport(module, tokens);
   }
   
-  parseDecls(module);
+  parseDecls(module, token);
   
   return module;
 }
 
-function parseImport(module : Module, tokens: Iterator<string>) : string|undefined {
+function parseImport(module: Module, tokens: Iterator<Token>): Token {
   const idLink = new IdentifierToLink();
   
   let token = tokens.next().value;
@@ -43,9 +48,10 @@ function parseImport(module : Module, tokens: Iterator<string>) : string|undefin
   
   idLink.setModulePath(token.value);
   
-  return tokens.next();
+  return tokens.next().value;
 }
 
-function parseDecls(module : Module) {
+function parseDecls(module: Module, token: Token) {
   
 }
+/*/

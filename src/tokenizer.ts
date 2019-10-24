@@ -2,41 +2,52 @@
   Tokenizer for the Chalk programming language.
 /*/
 
-interface SimpleToken {
-  type: "comptime" | "import" | "ignore" | "nowait" | "switch" | "class" | "trait"
-    | "await" | "type" | "case" | "mut" | "let" | "cst" | "imt" | "any" | "<=>"
-    | "**=" | "<->" | "=>" | "[]" | "||" | "&&" | "==" | "!=" | "<=" | ">=" | "is"
-    | "++" | "**" | "+=" | "-=" | "*=" | "/=" | "%=" | "<-" | "->" | ";" | "="
-    | "(" | ")" | "{" | "}" | "<" | ">" | "|" | "&" | "*" | "." | "," | "?" | ":"
-    | "%" | "+" | "-" | "/" | "!" | "[" | "]";
+import { AstNode } from './parser.js';
+
+const uppercaseTokens = [ "All", "Ex", "Exists" ];
+const simpleSymbolArr =
+  [ "comptime", "import", "ignore", "nowait", "switch", "class", "trait", "await",
+    "type", "case", "mut", "let", "cst", "imt", "any", "<=>", "**=", "<->", "=>",
+    "[]", "||", "&&", "==", "!=", "<=", ">=", "is", "++", "**", "+=", "-=", "*=",
+    "/=", "%=", "<-", "->", ";", "=", "(", ")", "{", "}", "<", ">", "|", "&",
+    "*", ".", ",", "?", ":", "%", "+", "-", "/", "!", "[", "]", ... uppercaseTokens,
+  ];
+
+type SimpleSymbol = typeof simpleSymbolArr[number];
+
+interface SimpleToken extends AstNode {
+  type: SimpleSymbol;
   row: number;
   col: number;
 }
 
-interface NamedToken {
-  type: "break" | "continue" | "for" | "return" | "lIdentifier" | "uIdentifier";
+const namedSymbolArr =
+  [ "break", "continue", "for", "return", "lIdentifier", "uIdentifier" ];
+
+interface NamedToken extends AstNode {
+  type: typeof namedSymbolArr[number];
   row: number;
   col: number;
   name: string;
 }
 
-interface StringToken {
+interface StringToken extends AstNode {
   type: "string";
   row: number;
   col: number;
   value: string;
 }
 
-interface NumberToken {
+interface NumberToken extends AstNode {
   type: "number";
   row: number;
   col: number;
   value: number;
 }
 
-type Token = SimpleToken | NamedToken | StringToken | NumberToken;
+export type Token = SimpleToken|NamedToken|StringToken|NumberToken;
 
-export function* tokenizer(str : string, isChalkDoc : boolean) : Token {
+export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<Token> {
   let rowCount = 0;
   let rowStart = 0;
   let i = 0;
@@ -93,26 +104,22 @@ export function* tokenizer(str : string, isChalkDoc : boolean) : Token {
     
     let match;
     
-    if (match = [ "comptime", "import", "ignore", "nowait", "switch", "class", "trait",
-          "await", "type", "case", "mut", "let", "cst", "imt", "any", "<=>",
-          "**=", "<->", "=>", "[]", "||", "&&", "==", "!=", "<=", ">=", "is",
-          "++", "**", "+=", "-=", "*=", "/=", "%=", "<-", "->", ";", "=", "(",
-          ")", "{", "}", "<", ">", "|", "&", "*", ".", ",", "?", ":", "%", "+",
-          "-", "/", "!", "[", "]",
-        ].find(symbol => str.substring(i, i + symbol.length) == symbol)) {
-      yield { type: match, row: rowCount, col: i - rowStart };
+    if (match = simpleSymbolArr.find(symbol => str.substring(i, i + symbol.length) == symbol)) {
+      if (uppercaseTokens.includes(match)) match = "@" + match;
+      
+      yield { type: match, row: rowCount, col: i - rowStart, prev: null };
       
       i += match.length;
       
       continue;
     }
     
-    if (match = [ "break", "continue", "for", "return" ].find(symbol => str.substring(i, i + symbol.length) == symbol)) {
+    if (match = namedSymbolArr.find(symbol => str.substring(i, i + symbol.length) == symbol)) {
       const col = i - rowStart;
       
       i += match.length;
       
-      let name = null;
+      let name = "";
       
       if (str[i] == "-") {
         i++;
@@ -125,7 +132,7 @@ export function* tokenizer(str : string, isChalkDoc : boolean) : Token {
         name = str.substring(nameStart, i);
       }
       
-      yield { type: name, row: rowCount, col, name };
+      yield { type: name, row: rowCount, col, prev: null, name };
       
       continue;
     }
@@ -150,7 +157,7 @@ export function* tokenizer(str : string, isChalkDoc : boolean) : Token {
       
       while (i < str.length && str[i].match(/[a-zA-Z0-9]/)) i++;
       
-      yield { type, row: rowCount, col: i - rowStart, name: str.substring(nameStart, i) };
+      yield { type, row: rowCount, col: i - rowStart, prev: null, name: str.substring(nameStart, i) };
       
       continue;
     }
@@ -179,7 +186,7 @@ export function* tokenizer(str : string, isChalkDoc : boolean) : Token {
       
       i++;
       
-      yield { type: "string", row: rowCount, col: i - rowStart, value };
+      yield { type: "string", row: rowCount, col: i - rowStart, prev: null, value };
       
       continue;
     }
@@ -235,6 +242,7 @@ export function* tokenizer(str : string, isChalkDoc : boolean) : Token {
         type: "number",
         row: rowCount,
         col: i - rowStart,
+        prev: null,
         value: (wholeNum + fractionalNum * base ** (-fractionalDigits)) * base ** magnitude,
       };
       

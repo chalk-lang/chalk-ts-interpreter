@@ -8,18 +8,44 @@ export class Modules {
 
 export class Module {
   importPaths = new Set();
+  path: string;
   
-  linkImports(modules : Modules) {
+  members: Map<string, Value> = new Map();
+  
+  constructor(path: string) {
+    this.path = path;
+  }
+  
+  addMember(name: string, member: Expr) {
+    // TODO
+  }
+  
+  linkImports(modules: Modules) {
     // TODO
   }
 }
 
-class Destructuring {}
-
-export class ObjectDestructuring extends Destructuring {
-  names = new Map<string, string|Destructuring>;
+export class Class {
+  name: string;
 }
 
-export class ArrayTupleDestructuring extends Destructuring {
+export class Function {
+  name: string;
+  body: Expr[];
+}
+
+type Expr = Destructuring;
+
+type Destructuring = ObjectLiteral | ArrayLiteral | TupleLiteral;
+
+export class ObjectLiteral {
+  names = new Map<string, string|Destructuring>();
+}
+
+export class ArrayLiteral {
+  names: (String|Destructuring)[] = [];
+}
+
+export class TupleLiteral {
   names: (String|Destructuring)[] = [];
 }

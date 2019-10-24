@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "downlevelIteration": true,
     "newLine": "lf",
     "noImplicitThis": true,
     "noUnusedLocals": true,
