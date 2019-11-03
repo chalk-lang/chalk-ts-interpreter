@@ -1,5 +1,8 @@
 /*/
   Grammar of the Chalk language.
+  
+  If you change the grammar, also change the hardcoded number of states of the
+  parser table in `parser-table-generator.ts`. Ctrl + F `numOfStates`.
 /*/
 
 import * as Rules from "./chalk-ir";
@@ -221,10 +224,12 @@ export const chalkGrammar: Grammar =
     [ "Tuple", [ "(", "Expr", "LitExprListNext", ")" ] ],
     [ "Tuple", [ "(", "VarDefSkeleton", "LitExprListNext", ")" ] ],
     [ "ObjectLit", [ "{", "}" ] ],
+    [ "ObjectLit", [ "{", "Identifier", "ObjNext", "}" ] ],
     [ "ObjectLit", [ "{", "Identifier", ":", "Expr", "ObjNext", "}" ] ],
     [ "ObjectLit", [ "{", "Identifier", ":", "VarDefSkeleton", "ObjNext", "}" ] ],
     [ "ObjectLit", [ "{", "VarDefSkeleton", "ObjNext", "}" ] ],
     [ "ObjectLit", [ "{", "VarDef", "ObjNext", "}" ] ],
+    [ "ObjNext", [ ",", "Identifier", "ObjNext" ] ],
     [ "ObjNext", [ ",", "Identifier", ":", "Expr", "ObjNext" ] ],
     [ "ObjNext", [ ",", "Identifier", ":", "VarDefSkeleton", "ObjNext" ] ],
     [ "ObjNext", [ ",", "VarDefSkeleton", "ObjNext" ] ],

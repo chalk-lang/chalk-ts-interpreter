@@ -26,7 +26,9 @@ class Main {
         ".chdoc": { symbol: "ChalkDocModule", isDoc: true },
       };
     
-    if (!obj[ext]) throw new Error("Unknown extension: " + ext);
+    if (!obj[ext]) throw new Error("Unknown extension \"" + ext + "\" of file: "
+      + path);
+    
     if (this.loadingPaths.has(path)) return this.loadingPaths.get(path);
     
     const promise = promises.readFile(path, "utf8");
@@ -46,4 +48,6 @@ class Main {
   }
 }
 
-new Main({ mainPath: process.argv[1] });
+if (!process.argv[2]) throw new Error("Argument expected (program entry point)");
+
+new Main({ mainPath: process.argv[2] });

@@ -11,15 +11,13 @@ import {
   NumberToken
 } from "./tokenizer";
 
-import { AstNode } from "./parser";
-
-type A = AstNode|null;
+export class AstNode {}
 
 export class ImportWhat extends AstNode {
   names: Map<string, [ string, string[] ]> = new Map();
   
-  constructor(prev: A, whatToImport: ObjectLit|NamedToken) {
-    super(prev);
+  constructor(whatToImport: ObjectLit|NamedToken) {
+    super();
     
     whatToImport instanceof ObjectLit
       ? this.object(whatToImport) : this.name(whatToImport);
@@ -36,12 +34,11 @@ export class ImportWhat extends AstNode {
 
 export class Import extends AstNode {
   constructor(
-    prev: A,
     public what: string|ImportWhat,
     _from: unknown,
     public path: StringToken
   ) {
-    super(prev);
+    super();
     
     // TODO
   }
@@ -50,8 +47,8 @@ export class Import extends AstNode {
 export class Imports extends AstNode {
   imports: Import[];
   
-  constructor(prev: A, i?: Import, rest?: Imports) {
-    super(prev);
+  constructor(i?: Import, rest?: Imports) {
+    super();
     
     this.imports = rest ? rest.imports : [];
     
@@ -61,10 +58,9 @@ export class Imports extends AstNode {
 
 export class Literal extends AstNode {
   constructor(
-    prev: A,
     lit: NumberToken|StringToken|VarDef|ArrowFnDef|FnDef|ClassDef|TraitDef|Array|Tuple|ObjectLit|SetLit,
   ) {
-    super(prev);
+    super();
     
     // TODO
   };
@@ -72,11 +68,10 @@ export class Literal extends AstNode {
 
 export class Unary extends AstNode {
   constructor(
-    prev: A,
     zeroth: Unary|NamedToken|Type|Literal|FunctionCall|Block|Switch|For,
     first: NamedToken|Expr,
   ) {
-    super(prev);
+    super();
     
     // TODO
   }
@@ -85,14 +80,14 @@ export class Unary extends AstNode {
 export class NegS {
   s: "await"|"nowait"|"ignore";
   
-  constructor(prev: A, s: SimpleToken) {
+  constructor(s: SimpleToken) {
     this.s = s.type as "await"|"nowait"|"ignore";
   }
 }
 
 export class Neg extends AstNode {
-  constructor(prev: A, z: Neg|NegS|Unary, f: Neg) {
-    super(prev);
+  constructor(z: Neg|NegS|Unary, f: Neg) {
+    super();
     
     // TODO
   }
@@ -101,16 +96,16 @@ export class Neg extends AstNode {
 export class AssignS extends AstNode {
   s: "="|"+="|"-="|"*="|"/="|"%="|"**=";
   
-  constructor(prev: A, s: SimpleToken) {
-    super(prev);
+  constructor(s: SimpleToken) {
+    super();
     
     this.s = s.type as "="|"+="|"-="|"*="|"/="|"%="|"**=";
   }
 }
 
 export class Assign extends AstNode {
-  constructor(prev: A, left: Neg, op: AssignS, right: Assign) {
-    super(prev);
+  constructor(left: Neg, op: AssignS, right: Assign) {
+    super();
     
     // TODO
   }
@@ -123,12 +118,11 @@ class Op extends AstNode {
   right: AstNode;
   
   constructor(
-    prev: A,
     left: AstNode,
     op: string|AstNode,
     right?: AstNode,
   ) {
-    super(prev);
+    super();
     
     this.op = typeof op === "string" ? op : null;
     this.left = left;
@@ -139,8 +133,8 @@ class Op extends AstNode {
 export class EqualS extends AstNode {
   s: "=="|"!=";
   
-  constructor(prev: A, s: SimpleToken) {
-    super(prev);
+  constructor(s: SimpleToken) {
+    super();
     
     this.s = s.type as "=="|"!=";
   }
@@ -149,8 +143,8 @@ export class EqualS extends AstNode {
 export class RelationS extends AstNode {
   s: "<"|">"|"<="|">="|"is";
   
-  constructor(prev: A, s: SimpleToken) {
-    super(prev);
+  constructor(s: SimpleToken) {
+    super();
     
     this.s = s.type as "<"|">"|"<="|">="|"is";
   }
@@ -159,8 +153,8 @@ export class RelationS extends AstNode {
 export class AddS extends AstNode {
   s: "+"|"-";
   
-  constructor(prev: A, s: SimpleToken) {
-    super(prev);
+  constructor(s: SimpleToken) {
+    super();
     
     this.s = s.type as "+"|"-";
   }
@@ -169,8 +163,8 @@ export class AddS extends AstNode {
 export class MulS extends AstNode {
   s: "*"|"/";
   
-  constructor(prev: A, s: SimpleToken) {
-    super(prev);
+  constructor(s: SimpleToken) {
+    super();
     
     this.s = s.type as "*"|"/";
   }
@@ -198,8 +192,8 @@ export const OrR = Op;
 export const OrL = Op;
 
 export class QMarkR extends AstNode {
-  constructor(prev: A, left: Op, mid: Expr, right: QMarkR) {
-    super(prev);
+  constructor(left: Op, mid: Expr, right: QMarkR) {
+    super();
     
     // TODO;
   }
@@ -210,16 +204,16 @@ export const QMarkL = QMarkR;
 export class ExprS extends AstNode {
   s: "return"|"break"|"comptime"|"ignore"|"mutab"|"immut"|"const";
   
-  constructor(prev: A, s: SimpleToken) {
-    super(prev);
+  constructor(s: SimpleToken) {
+    super();
     
     this.s = s.type as "return"|"break"|"comptime"|"ignore"|"mutab"|"immut"|"const";
   }
 }
 
 export class Expr extends AstNode {
-  constructor(prev: A, z: ExprS|SimpleToken|QMarkR, f: Expr) {
-    super(prev);
+  constructor(z: ExprS|SimpleToken|QMarkR, f: Expr) {
+    super();
     
     // TODO
   }
@@ -228,8 +222,8 @@ export class Expr extends AstNode {
 export class Identifier extends AstNode {
   name: string;
   
-  constructor(prev: A, name: NamedToken) {
-    super(prev);
+  constructor(name: NamedToken) {
+    super();
     
     this.name = name.name;
   }
@@ -238,8 +232,8 @@ export class Identifier extends AstNode {
 export class TypeListNext extends AstNode {
   types: Type[];
   
-  constructor(prev: A, type?: Type, list?: TypeListNext) {
-    super(prev);
+  constructor(type?: Type, list?: TypeListNext) {
+    super();
     
     this.types = list ? list.types : [];
     
@@ -249,12 +243,11 @@ export class TypeListNext extends AstNode {
 
 export class MemAccessType extends AstNode {
   constructor(
-    prev: A,
     id: Identifier|NamedToken,
     type?: MemAccessType|Type,
     list?: TypeListNext
   ) {
-    super(prev);
+    super();
     
     // TODO
   }
@@ -263,8 +256,8 @@ export class MemAccessType extends AstNode {
 export class TypeModifier extends AstNode {
   modifier: string;
   
-  constructor(prev: A, modifier: SimpleToken) {
-    super(prev);
+  constructor(modifier: SimpleToken) {
+    super();
     
     this.modifier = modifier.type;
   }
@@ -272,34 +265,33 @@ export class TypeModifier extends AstNode {
 
 export class AtomicType extends AstNode {
   constructor(
-    prev: A,
     zeroth: TypeModifier|SimpleToken|Type|MemAccessType,
     first?: AtomicType|TypeListNext) {
-    super(prev);
+    super();
     
     // TODO
   }
 }
 
 export class TypeIntersection extends AstNode {
-  constructor(prev: A, zeroth: AtomicType, first?: TypeIntersection) {
-    super(prev);
+  constructor(zeroth: AtomicType, first?: TypeIntersection) {
+    super();
     
     // TODO
   }
 }
 
 export class TypeUnion extends AstNode {
-  constructor(prev: A, zeroth: TypeIntersection, first: TypeUnion) {
-    super(prev);
+  constructor(zeroth: TypeIntersection, first: TypeUnion) {
+    super();
     
     // TODO
   }
 }
 
 export class Type extends AstNode {
-  constructor(prev: A, type: TypeUnion) {
-    super(prev);
+  constructor(type: TypeUnion) {
+    super();
     
     // TODO
   }
@@ -308,32 +300,32 @@ export class Type extends AstNode {
 export class Access extends AstNode {
   access: "mut"|"let"|"cst"|"imt";
   
-  constructor(prev: A, access: SimpleToken) {
-    super(prev);
+  constructor(access: SimpleToken) {
+    super();
     
     this.access = access.type as "mut"|"let"|"cst"|"imt";
   }
 }
 
 export class VarDefSkeleton extends AstNode {
-  constructor(prev: A, ta: Type|Access, it: Identifier|Type, i?: Identifier) {
-    super(prev);
+  constructor(ta: Type|Access, it: Identifier|Type, i?: Identifier) {
+    super();
     
     // TODO
   }
 }
 
 export class LitExprListNext extends AstNode {
-  constructor(prev: A, item?: Expr|VarDefSkeleton, rest?: LitExprListNext) {
-    super(prev);
+  constructor(item?: Expr|VarDefSkeleton, rest?: LitExprListNext) {
+    super();
     
     // TODO
   }
 }
 
 export class Tuple extends AstNode {
-  constructor(prev: A, item?: Expr|VarDefSkeleton, rest?: LitExprListNext) {
-    super(prev);
+  constructor(item?: Expr|VarDefSkeleton, rest?: LitExprListNext) {
+    super();
     
     // TODO
   }
@@ -341,12 +333,11 @@ export class Tuple extends AstNode {
 
 export class VarDef extends AstNode {
   constructor(
-    prev: A,
     z: VarDefSkeleton|AtomicType|Access,
     f: Expr|Tuple|AtomicType,
     s: Tuple
   ) {
-    super(prev);
+    super();
     
     // TODO
   }
@@ -359,96 +350,96 @@ export class VarDef extends AstNode {
 }
 
 export class MType extends AstNode {
-  constructor(prev: A, type?: Type) {
-    super(prev);
+  constructor(type?: Type) {
+    super();
     
     // TODO
   }
 }
 
 export class MIdentifier extends AstNode {
-  constructor(prev: A, id?: Identifier) {
-    super(prev);
+  constructor(id?: Identifier) {
+    super();
     
     // TODO
   }
 }
 
 export class IdListNext extends AstNode {
-  constructor(prev: A, i?: NamedToken, rest?: IdListNext) {
-    super(prev);
+  constructor(i?: NamedToken, rest?: IdListNext) {
+    super();
     
     // TODO
   }
 }
 
 export class IdList extends AstNode {
-  constructor(prev: A, i?: NamedToken, rest?: IdListNext) {
-    super(prev);
+  constructor(i?: NamedToken, rest?: IdListNext) {
+    super();
     
     // TODO
   }
 }
 
 export class ParamsRest extends AstNode {
-  constructor(prev: A, z: Type|Identifier|SimpleToken, f?: Identifier) {
-    super(prev);
+  constructor(z: Type|Identifier|SimpleToken, f?: Identifier) {
+    super();
     
     // TODO
   }
 }
 
 export class Params extends AstNode {
-  constructor(prev: A, type?: Type, id?: Identifier, rest?: ParamsRest) {
-    super(prev);
+  constructor(type?: Type, id?: Identifier, rest?: ParamsRest) {
+    super();
     
     // TODO
   }
 }
 
 export class ArrowFnDef extends AstNode {
-  constructor(prev: A, mType: MType, i: Identifier|MIdentifier, a: Expr|IdList|Params, b?: Expr) {
-    super(prev);
+  constructor(mType: MType, i: Identifier|MIdentifier, a: Expr|IdList|Params, b?: Expr) {
+    super();
     
     // TODO
   }
 }
 
 export class FnDeclaration extends AstNode {
-  constructor(prev: A, mType: MType, name: Identifier, params: Params) {
-    super(prev);
+  constructor(mType: MType, name: Identifier, params: Params) {
+    super();
     
     // TODO
   }
 }
 
 export class BlockOrEmpty extends AstNode {
-  constructor(prev: A, block?: Block) {
-    super(prev);
+  constructor(block?: Block) {
+    super();
     
     // TODO
   }
 }
 
 export class FnDef extends AstNode {
-  constructor(prev: A,dec: FnDeclaration, body: BlockOrEmpty) {
-    super(prev);
+  constructor(dec: FnDeclaration, body: BlockOrEmpty) {
+    super();
     
     // TODO
   }
 }
 
 export class DefExpr extends AstNode {
-  constructor(prev: A, public def: VarDef|ArrowFnDef|FnDef|ClassDef|TraitDef) {
-    super(prev);
+  constructor(public def: VarDef|ArrowFnDef|FnDef|ClassDef|TraitDef) {
+    super();
     
     // TODO
   }
 }
 
 export class Proposition extends AstNode {
-  constructor(prev: A) {
-    super(prev);
+  constructor() {
+    super();
     
     // TODO
   }
@@ -457,8 +448,8 @@ export class Proposition extends AstNode {
 export class DefExprs extends AstNode {
   defExprs: DefExpr[];
   
-  constructor(prev: A, defOrProp?: DefExpr|Proposition, defs?: DefExprs) {
-    super(prev);
+  constructor(defOrProp?: DefExpr|Proposition, defs?: DefExprs) {
+    super();
     
     this.defExprs = defs ? defs.defExprs : [];
     
@@ -467,40 +458,40 @@ export class DefExprs extends AstNode {
 }
 
 export class DefExprsTrait extends AstNode {
-  constructor(prev: A, z?: DefExpr|Proposition|FnDeclaration, rest?: DefExprsTrait) {
-    super(prev);
+  constructor(z?: DefExpr|Proposition|FnDeclaration, rest?: DefExprsTrait) {
+    super();
     
     // TODO
   }
 }
 
 export class GenericParams extends AstNode {
-  constructor(prev: A, params?: Params) {
-    super(prev);
+  constructor(params?: Params) {
+    super();
     
     // TODO
   }
 }
 
 export class ClassDef extends AstNode {
-  constructor(prev: A, name: NamedToken, params: GenericParams, defs: DefExprs) {
-    super(prev);
+  constructor(name: NamedToken, params: GenericParams, defs: DefExprs) {
+    super();
     
     // TODO
   }
 }
 
 export class TraitDef extends AstNode {
-  constructor(prev: A, name: NamedToken, params: GenericParams, defs: DefExprsTrait) {
-    super(prev);
+  constructor(name: NamedToken, params: GenericParams, defs: DefExprsTrait) {
+    super();
     
     // TODO
   }
 }
 
 export class Array extends AstNode {
-  constructor(prev: A, z?: Expr|VarDefSkeleton, rest?: LitExprListNext) {
-    super(prev);
+  constructor(z?: Expr|VarDefSkeleton, rest?: LitExprListNext) {
+    super();
     
     // TODO
   }
@@ -508,12 +499,11 @@ export class Array extends AstNode {
 
 export class ObjNext extends AstNode {
   constructor(
-    prev: A,
     z?: Identifier|VarDef|VarDefSkeleton,
     f?: Expr|VarDefSkeleton|ObjNext,
     s?: ObjNext,
   ) {
-    super(prev);
+    super();
     
     // TODO
   }
@@ -521,20 +511,19 @@ export class ObjNext extends AstNode {
 
 export class ObjectLit extends AstNode {
   constructor(
-    prev: A,
     z?: Identifier|VarDef|VarDefSkeleton,
     f?: Expr|VarDefSkeleton|ObjNext,
     s?: ObjNext,
   ) {
-    super(prev);
+    super();
     
     // TODO
   }
 }
 
 export class SetNext extends AstNode {
-  constructor(prev: A, item?: Expr|VarDefSkeleton, rest?: SetNext) {
-    super(prev);
+  constructor(item?: Expr|VarDefSkeleton, rest?: SetNext) {
+    super();
     
     // TODO
   }
@@ -542,19 +531,18 @@ export class SetNext extends AstNode {
 
 export class SetLit extends AstNode {
   constructor(
-    prev: A,
     z: Expr|VarDefSkeleton,
     f: Expr|VarDefSkeleton,
     rest: SetNext) {
-    super(prev);
+    super();
     
     // TODO
   }
 }
 
 export class FunctionCall extends AstNode {
-  constructor(prev: A, expr: Expr, args: Tuple) {
-    super(prev);
+  constructor(expr: Expr, args: Tuple) {
+    super();
     
     // TODO: if (isAtomicType(expr)) throw new Error("Rejecting wrong parse");
     
@@ -563,48 +551,48 @@ export class FunctionCall extends AstNode {
 }
 
 export class ExprList extends AstNode {
-  constructor(prev: A, item: Expr|Proposition|DefExpr, rest?: ExprList) {
-    super(prev);
+  constructor(item: Expr|Proposition|DefExpr, rest?: ExprList) {
+    super();
     
     // TODO
   }
 }
 
 export class Block extends AstNode {
-  constructor(prev: A, exprs: ExprList) {
-    super(prev);
+  constructor(exprs: ExprList) {
+    super();
     
     // TODO
   }
 }
 
 export class MExpr extends AstNode {
-  constructor(prev: A, expr?: Expr) {
-    super(prev);
+  constructor(expr?: Expr) {
+    super();
     
     // TODO
   }
 }
 
 export class Case extends AstNode {
-  constructor(prev: A, z: Expr|DefExpr, f?: Expr|DefExpr) {
-    super(prev);
+  constructor(z: Expr|DefExpr, f?: Expr|DefExpr) {
+    super();
     
     // TODO
   }
 }
 
 export class Cases extends AstNode {
-  constructor(prev: A, c: Case, rest?: Cases) {
-    super(prev);
+  constructor(c: Case, rest?: Cases) {
+    super();
     
     // TODO
   }
 }
 
 export class Switch extends AstNode {
-  constructor(prev: A, expr: MExpr, cases: Cases) {
-    super(prev);
+  constructor(expr: MExpr, cases: Cases) {
+    super();
     
     // TODO
   }
@@ -612,13 +600,12 @@ export class Switch extends AstNode {
 
 export class For extends AstNode {
   constructor(
-    prev: A,
     z: Expr|BlockOrEmpty,
     f: Expr|BlockOrEmpty,
     s: Expr|BlockOrEmpty,
     t: BlockOrEmpty,
   ) {
-    super(prev);
+    super();
     
     // TODO
   }
@@ -630,8 +617,8 @@ export class ChalkModule extends AstNode {
   
   members: Map<string, Expr|null> = new Map();
   
-  constructor(prev: A, imports: Imports, defs: DefExprs) {
-    super(prev);
+  constructor(imports: Imports, defs: DefExprs) {
+    super();
     
     // TODO
   }

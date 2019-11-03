@@ -8,7 +8,8 @@
   "main": "out/main.js",
   "scripts": {
     "build": "rm -r ./out \n tsc",
-    "tables": "node ./out/parser-table-generator.js"
+    "tables": "node ./out/parser-table-generator.js",
+    "run": "node ./out/main.js"
   },
   "repository": {
     "type": "git",

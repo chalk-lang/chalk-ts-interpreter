@@ -2,7 +2,9 @@
   Tokenizer for the Chalk programming language.
 /*/
 
-export abstract class Token {
+import { AstNode } from "./chalk-ir";
+
+export abstract class Token extends AstNode {
   type!: string;
   row!: number;
   col!: number;

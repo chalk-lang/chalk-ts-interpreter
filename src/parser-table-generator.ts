@@ -31,6 +31,10 @@ class Visited {
   }
 }
 
+/*/
+  Map from non-terminals T to all characters ch s.t. T can generate a word
+  starting with ch. Empty string is included if T can generate the empty word.
+/*/
 const firstMap: Map<string, Set<string>> = (() => {
   const map: Map<string, Set<string>> = new Map();
   
@@ -50,18 +54,22 @@ const firstMap: Map<string, Set<string>> = (() => {
   }
   
   chalkGrammar.forEach(rule => {
-    map.has(rule[0]) || map.set(rule[0], first(rule[1]));
+    if (map.has(rule[0])) {
+      const set = map.get(rule[0])!;
+      
+      first(rule[1]).forEach(a => set.add(a));
+    } else map.set(rule[0], first(rule[1]));
   });
   
   return map;
 })();
 
-function first(symbols: string[]) {
+function first(symbols: string[]): Set<string> {
   const s = new Set<string>();
   
   symbols.some(symbol => {
-    if (isTerminal(symbols[0])) {
-      s.add(symbols[0]);
+    if (isTerminal(symbol)) {
+      s.add(symbol);
       
       return true;
     }
@@ -198,9 +206,14 @@ class Main {
     
     for (let i = 0; i < this.table.length; i++) {
       this.table[i].addStates(addState);
+      
+      const numOfStates = 4296;
+      
       process.stdout.write("\r\x1b[K" + i + " / 3362 ("
-        + (Math.floor(i / 0.3362) / 100) + "%)");
+        + (Math.floor(i * 10000 / numOfStates) / 100) + "%)");
     }
+    
+    console.log("");
     
     this.saveFile();
   }
