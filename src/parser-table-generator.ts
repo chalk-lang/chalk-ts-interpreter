@@ -104,7 +104,7 @@ class RuleAt {
 
 class Actions {
   shift: number|null = null;
-  reduce: number[] = [];
+  reduce: Set<number> = new Set();
   
   ruleAts: RuleAt[] = [];
 }
@@ -154,6 +154,7 @@ class ParserState {
   }
   
   addStates(addState: (kernel: RuleAt[]) => number, index: number): void {
+    index == 20 && console.log(this.ruleAts);
     for (let ruleAt of this.ruleAts) {
       if (ruleAt.read) {
         const { ruleAts } = this.getActions(ruleAt.read);
@@ -162,7 +163,7 @@ class ParserState {
         ruleAts.every(r => !RuleAt.equals(r, moved)) && ruleAts.push(moved);
       } else {
         ruleAt.context.forEach(symbol =>(
-          this.getActions(symbol).reduce.push(chalkGrammar.indexOf(ruleAt.rule))),
+          this.getActions(symbol).reduce.add(chalkGrammar.indexOf(ruleAt.rule))),
         );
       }
     }
@@ -182,7 +183,7 @@ class ParserState {
     const obj: Transition = {};
     
     for (let [ symbol, actions ] of this.transitions) {
-      obj[symbol] = { shift: actions.shift, reduce: actions.reduce };
+      obj[symbol] = { shift: actions.shift, reduce: [ ...actions.reduce ] };
     }
     
     return obj;
