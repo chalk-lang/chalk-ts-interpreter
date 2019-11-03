@@ -4,7 +4,7 @@
 
 import { promises } from "fs";
 
-import { Grammar, Rule, isTerminal, chalkGrammar, startSymbols } from "./grammar";
+import { Rule, isTerminal, chalkGrammar, startSymbols } from "./grammar";
 
 export interface Transition {
   [key: string]: {
@@ -153,7 +153,7 @@ class ParserState {
     return actions;
   }
   
-  addStates(addState: (kernel: RuleAt[]) => number): void {
+  addStates(addState: (kernel: RuleAt[]) => number, index: number): void {
     for (let ruleAt of this.ruleAts) {
       if (ruleAt.read) {
         const { ruleAts } = this.getActions(ruleAt.read);
@@ -168,7 +168,7 @@ class ParserState {
     }
     
     for (let [ symbol, actions ] of this.transitions) {
-      symbol === "" || (actions.shift = addState(actions.ruleAts));
+      actions.ruleAts.length > 0 && (actions.shift = addState(actions.ruleAts));
     }
   }
   
@@ -205,11 +205,11 @@ class Main {
     const addState = this.addState.bind(this);
     
     for (let i = 0; i < this.table.length; i++) {
-      this.table[i].addStates(addState);
+      this.table[i].addStates(addState, i);
       
-      const numOfStates = 4296;
+      const numOfStates = 4295;
       
-      process.stdout.write("\r\x1b[K" + i + " / 3362 ("
+      process.stdout.write("\r\x1b[K" + i + " / " + numOfStates + " ("
         + (Math.floor(i * 10000 / numOfStates) / 100) + "%)");
     }
     
