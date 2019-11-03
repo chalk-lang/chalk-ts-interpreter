@@ -154,7 +154,6 @@ class ParserState {
   }
   
   addStates(addState: (kernel: RuleAt[]) => number, index: number): void {
-    index == 20 && console.log(this.ruleAts);
     for (let ruleAt of this.ruleAts) {
       if (ruleAt.read) {
         const { ruleAts } = this.getActions(ruleAt.read);
