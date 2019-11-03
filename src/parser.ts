@@ -10,12 +10,24 @@ import { ChalkModule, AstNode } from "./chalk-ir";
 import * as parserTableU from "./parser-table.json";
 const parserTable: Transition[] = parserTableU;
 
+const emptyArr: never[] = [];
+
 class Head {
   constructor(
     public child: AstNode|null,
     public prev: Head|null,
     public state: Transition
   ) {}
+  
+  removeReduces(): Head {
+    const transition: Transition = {};
+    
+    Object.keys(this.state).forEach(key => {
+      transition[key] = { shift: this.state[key].shift, reduce: emptyArr };
+    });
+    
+    return new Head(this.child, this.prev, transition);
+  }
 }
 
 function goBackN(node: Head, n: number): Head {
@@ -47,7 +59,7 @@ export async function parse(tokens: Iterator<Token, Token>, startSymbol: string)
           heads.push(new Head(token, head, parserTable[actions.shift]));
           
           token = tokens.next().value;
-        } else heads.push(head);
+        } else heads.push(head.removeReduces());
       }
       
       for (let index of actions.reduce) {
@@ -69,7 +81,7 @@ export async function parse(tokens: Iterator<Token, Token>, startSymbol: string)
       }
     }
     
-    await new Promise(f => setTimeout(f, 2000));
+    await new Promise(f => setTimeout(f, 1000));
   }
   
   if (!ast) throw new Error("Cannot parse at "
