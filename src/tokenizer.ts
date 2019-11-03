@@ -2,50 +2,74 @@
   Tokenizer for the Chalk programming language.
 /*/
 
-import { AstNode } from './parser.js';
-
-const uppercaseTokens = [ "All", "Ex", "Exists" ];
-const simpleSymbolArr =
-  [ "comptime", "import", "ignore", "nowait", "switch", "class", "trait", "await",
-    "type", "case", "mut", "let", "cst", "imt", "any", "<=>", "**=", "<->", "=>",
-    "[]", "||", "&&", "==", "!=", "<=", ">=", "is", "++", "**", "+=", "-=", "*=",
-    "/=", "%=", "<-", "->", ";", "=", "(", ")", "{", "}", "<", ">", "|", "&",
-    "*", ".", ",", "?", ":", "%", "+", "-", "/", "!", "[", "]", ... uppercaseTokens,
-  ];
-
-type SimpleSymbol = typeof simpleSymbolArr[number];
-
-interface SimpleToken extends AstNode {
-  type: SimpleSymbol;
-  row: number;
-  col: number;
+export abstract class Token {
+  type!: string;
+  row!: number;
+  col!: number;
 }
 
-const namedSymbolArr =
-  [ "break", "continue", "for", "return", "lIdentifier", "uIdentifier" ];
-
-interface NamedToken extends AstNode {
-  type: typeof namedSymbolArr[number];
-  row: number;
-  col: number;
-  name: string;
+export class EmptyToken extends Token {
+  type = "";
+  
+  constructor(public row: number, public col: number) {
+    super();
+  }
 }
 
-interface StringToken extends AstNode {
-  type: "string";
-  row: number;
-  col: number;
-  value: string;
+export class SimpleToken extends Token {
+  static typesUppercase = [ "All", "Ex", "Exists" ];
+  static types =
+    [ "comptime", "import", "ignore", "nowait", "switch", "class", "trait", "await",
+      "type", "case", "mut", "let", "cst", "imt", "any", "<=>", "**=", "<->", "=>",
+      "[]", "||", "&&", "==", "!=", "<=", ">=", "is", "++", "**", "+=", "-=", "*=",
+      "/=", "%=", "<-", "->", ";", "=", "(", ")", "{", "}", "<", ">", "|", "&",
+      "*", ".", ",", "?", ":", "%", "+", "-", "/", "!", "[", "]",
+      ...SimpleToken.typesUppercase,
+    ];
+  
+  constructor(
+    public type: typeof SimpleToken.types[number],
+    public row: number,
+    public col: number
+  ) {
+    super();
+  }
 }
 
-interface NumberToken extends AstNode {
-  type: "number";
-  row: number;
-  col: number;
-  value: number;
+export class NamedToken extends Token {
+  static types = [ "break", "continue", "for", "return", "lIdentifier", "uIdentifier" ];
+  
+  constructor(
+    public type: typeof NamedToken.types[number],
+    public row: number,
+    public col: number,
+    public name: string
+  ) {
+    super();
+  }
 }
 
-export type Token = SimpleToken|NamedToken|StringToken|NumberToken;
+export class StringToken extends Token {
+  constructor(
+    public type: "string",
+    public row: number,
+    public col: number,
+    public value: string,
+  ) {
+    super();
+  }
+}
+
+export class NumberToken extends Token {
+  constructor(
+    public type: "number",
+    public row: number,
+    public col: number,
+    public value: number,
+  ) {
+    super();
+  }
+}
 
 export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<Token> {
   let rowCount = 0;
@@ -104,17 +128,17 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
     
     let match;
     
-    if (match = simpleSymbolArr.find(symbol => str.substring(i, i + symbol.length) == symbol)) {
-      if (uppercaseTokens.includes(match)) match = "@" + match;
+    if (match = SimpleToken.types.find(symbol => str.substring(i, i + symbol.length) == symbol)) {
+      if (SimpleToken.typesUppercase.includes(match)) match = "@" + match;
       
-      yield { type: match, row: rowCount, col: i - rowStart, prev: null };
+      yield new SimpleToken(match, rowCount, i - rowStart);
       
       i += match.length;
       
       continue;
     }
     
-    if (match = namedSymbolArr.find(symbol => str.substring(i, i + symbol.length) == symbol)) {
+    if (match = NamedToken.types.find(symbol => str.substring(i, i + symbol.length) == symbol)) {
       const col = i - rowStart;
       
       i += match.length;
@@ -132,7 +156,7 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
         name = str.substring(nameStart, i);
       }
       
-      yield { type: name, row: rowCount, col, prev: null, name };
+      yield new NamedToken(name, rowCount, col, name);
       
       continue;
     }
@@ -157,7 +181,12 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
       
       while (i < str.length && str[i].match(/[a-zA-Z0-9]/)) i++;
       
-      yield { type, row: rowCount, col: i - rowStart, prev: null, name: str.substring(nameStart, i) };
+      yield new NamedToken(
+        type,
+        rowCount,
+        i - rowStart,
+        str.substring(nameStart, i)
+      );
       
       continue;
     }
@@ -186,7 +215,7 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
       
       i++;
       
-      yield { type: "string", row: rowCount, col: i - rowStart, prev: null, value };
+      yield new StringToken("string", rowCount, i - rowStart, value);
       
       continue;
     }
@@ -238,17 +267,18 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
       
       if (isNaN(wholeNum) || isNaN(fractionalNum) || isNaN(magnitude)) throw new Error("Bad number at " + rowCount + ":" + (i - rowStart));
       
-      yield {
-        type: "number",
-        row: rowCount,
-        col: i - rowStart,
-        prev: null,
-        value: (wholeNum + fractionalNum * base ** (-fractionalDigits)) * base ** magnitude,
-      };
+      yield new NumberToken(
+        "number",
+        rowCount,
+        i - rowStart,
+        (wholeNum + fractionalNum * base ** (-fractionalDigits)) * base ** magnitude,
+      );
       
       continue;
     }
     
     throw new Error("Unknown: " + str.substring(i, i + 30));
   }
+  
+  yield new EmptyToken(rowCount, i - rowStart);
 }

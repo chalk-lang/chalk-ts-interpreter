@@ -2,74 +2,77 @@
   A parser generator loosely based on LR parser.
 /*/
 
-import { Grammar } from "./grammar";
-import { Token } from "./tokenizer";
+import { Grammar, startSymbols, chalkGrammar } from "./grammar";
+import { Token, EmptyToken } from "./tokenizer";
+import { Transition } from "./parser-table-generator";
+import { ChalkModule } from "./chalk-ir";
 
-type Actions = {
-  reduce: number[],
-  read: number[],
-};
+import * as parserTableU from "./parser-table.json";
+const parserTable: Transition[] = parserTableU;
 
 export class AstNode {
-  prev: AstNode|null;
-  child?: AstNode;
-  
-  constructor(child: AstNode|null, prev: AstNode|null) {
-    this.child = child;
-    this.prev = prev;
-  }
+  constructor(
+    public child: Token|AstNode|null,
+    public prev: AstNode|null,
+    public state: Transition
+  ) {}
 }
 
-class Head {
-  node: AstNode;
-  state: ParserState;
-  
-  getActions(token: Token): Actions {
-    // TODO
-  }
-}
-
-function goBackN(node: AstNode, n) {
-  for (let i = 0; i < n; i++) node = node.prev;
+function goBackN(node: AstNode, n: number) {
+  for (let i = 0; i < n; i++) node = node.prev as AstNode;
   
   return node;
 }
 
-class ParserState {
+export function parse(tokens: Iterator<Token, null>, startSymbol: string): ChalkModule {
+  const startState: Transition = parserTable[startSymbols.indexOf(startSymbol) ];
   
-}
-
-class Parser {
-  startStates: Map<string, ParserState>;
+  let astHeads: AstNode[] = [ new AstNode(null, null, startState) ];
+  let token: Token|null = tokens.next().value;
+  let ast: AstNode|null = null;
   
-  constructor(jsonTable: string) {
-    const table = JSON.parse(jsonTable).map(state => {
-      const ret = { transitions: new Map() };
-      
-      Object.keys(state).forEach(key => ret.transitions.set(key, state[key]));
-      
-      return ret;
-    });
+  while (astHeads.length > 0) {
+    const oldHeads = astHeads;
     
+    astHeads = [];
     
-  }
-  
-  parse(tokens: Iterator<Token>, startSymbol: string) {
-    let astHeads = [];
-    let token = tokens.next().value;
-    
-    while (token) {
-      const heads = astHeads;
+    for (let head of oldHeads) {
+      const actions = head.state[(token as Token).type];
       
-      astHeads = [];
+      if (!actions) continue;
       
-      for (let head of heads) {
-        for (let action of head.getActions(token)) {
-          let prevNode = goBackN(head, action.take);
+      if (actions.shift) {
+        if (actions.reduce.length === 0) {
+          astHeads.push(new AstNode(token, head, parserTable[actions.shift]));
           
-          new AstNode(head, prevNode)
+          token = tokens.next().value;
         }
+        
+        astHeads.push(head);
+      }
+      
+      for (let index of actions.reduce) {
+        if (index === -1) {
+          if (ast) throw new Error("Multiple parses of file.");
+          
+          ast = head;
+          
+          continue;
+        }
+        
+        let prevNode = goBackN(head, chalkGrammar[index][1].length);
+        
+        astHeads.push(new AstNode(head, prevNode, prevNode.state[chalkGrammar[index][0]]));
       }
     }
+    
+    if (astHeads.length === 0) {
+      if (tops.length === 0) throw new Error("Cannot parse at "
+      + (token ? token.row + ":" + token.col + "." : "end of file."));
+      
+      if (tops.length > 1)
+    }
+    
+    break;
   }
 }

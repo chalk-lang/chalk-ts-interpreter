@@ -21,11 +21,6 @@
   },
   "homepage": "https://github.com/chalk-lang/chalk-ts-interpreter#readme",
   "devDependencies": {},
-  "babel": {
-    "plugins": [
-      "@babel/plugin-transform-typescript"
-    ]
-  },
   "dependencies": {
     "@types/node": "^12.7.11"
   }

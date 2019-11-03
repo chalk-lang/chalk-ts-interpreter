@@ -4,9 +4,9 @@
 
 import { promises } from "fs";
 
-import { Grammar, Rule, isTerminal, chalkGrammar } from "./grammar";
+import { Grammar, Rule, isTerminal, chalkGrammar, startSymbols } from "./grammar";
 
-type JsonObject = {
+export interface Transition {
   [key: string]: {
     shift: number|null;
     reduce: number[];
@@ -17,33 +17,63 @@ function setEquals<T>(a: Set<T>, b: Set<T>): boolean {
   return a.size === b.size && (() => {
     let f = true;
     
-    a.forEach((a: T) => b.has(a) || (f = false));
+    a.forEach(a => b.has(a) || (f = false));
     
     return f;
   })();
 }
 
 class Visited {
-  constructor(public terminal: string, public prev: Visited|null) {}
+  constructor(public symbol: string, public prev: Visited|null) {}
   
-  has(terminal: string): boolean {
-    return this.terminal === terminal || !!this.prev && this.has(terminal);
+  has(symbol: string): boolean {
+    return this.symbol === symbol || !!this.prev && this.prev.has(symbol);
   }
 }
 
-function first(grammar: Grammar, symbols: string[], visitedTerminals: Visited|null = null): Set<string> {
-  if (symbols.length === 0) return new Set([ "" ]);
-  if (isTerminal(symbols[0])) return new Set([ symbols[0] ]);
-  if (visitedTerminals && visitedTerminals.has(symbols[0])) return new Set();
+const firstMap: Map<string, Set<string>> = (() => {
+  const map: Map<string, Set<string>> = new Map();
   
-  return grammar.map(rule => {
-    if (rule[0] == symbols[0]) {
-      return first(grammar, rule[1].concat(symbols.slice(1)), new Visited(symbols[0], visitedTerminals));
+  function first(symbols: string[], visited: Visited|null = null): Set<string> {
+    if (symbols.length === 0) return new Set([ "" ]);
+    if (isTerminal(symbols[0])) return new Set([ symbols[0] ]);
+    if (visited && visited.has(symbols[0])) return new Set();
+    
+    return chalkGrammar.map(rule => {
+      if (rule[0] === symbols[0]) {
+        return first(rule[1].concat(symbols.slice(1)), new Visited(symbols[0], visited));
+      }
+      
+      return null;
+      
+    }).reduce((acc: Set<string>, a) => (a && a.forEach(a => acc.add(a)), acc), new Set());
+  }
+  
+  chalkGrammar.forEach(rule => {
+    map.has(rule[0]) || map.set(rule[0], first(rule[1]));
+  });
+  
+  return map;
+})();
+
+function first(symbols: string[]) {
+  const s = new Set<string>();
+  
+  symbols.some(symbol => {
+    if (isTerminal(symbols[0])) {
+      s.add(symbols[0]);
+      
+      return true;
     }
     
-    return null;
+    const f = firstMap.get(symbol) as Set<string>;
     
-  }).reduce((acc: Set<string>, a) => (a && a.forEach(b => acc.add(b)), acc), new Set());
+    f.forEach(f => f === "" || s.add(f));
+    
+    return !f.has("");
+  }) || s.add("");
+  
+  return s;
 }
 
 class RuleAt {
@@ -76,21 +106,20 @@ class ParserState {
   ruleAts: RuleAt[];
   
   constructor(
-    grammar: Grammar,
     ruleAts: RuleAt[],
   ) {
     this.ruleAts = ruleAts;
     
-    this.addMissingRuleAts(grammar);
+    this.addMissingRuleAts();
   }
   
-  addMissingRuleAts(grammar: Grammar): void {
+  addMissingRuleAts(): void {
     for (let i = 0; i < this.ruleAts.length; i++) {
       const ruleAt = this.ruleAts[i];
+
+      if (!ruleAt.read || isTerminal(ruleAt.read)) continue;
       
-      if (!ruleAt.read || isTerminal(ruleAt.read)) return;
-      
-      const context = first(grammar, ruleAt.rule[1].slice(ruleAt.dot + 1));
+      const context = first(ruleAt.rule[1].slice(ruleAt.dot + 1));
       
       if (context.has("")) {
         ruleAt.context.forEach(f => context.add(f));
@@ -98,7 +127,7 @@ class ParserState {
         ruleAt.context.has("") || context.delete("");
       }
       
-      grammar.forEach(r => {
+      chalkGrammar.forEach(r => {
         if (r[0] !== ruleAt.read) return;
         
         const missing = new RuleAt(r, 0, context);
@@ -116,19 +145,22 @@ class ParserState {
     return actions;
   }
   
-  addStates(grammar: Grammar, addState: (kernel: RuleAt[]) => number): void {
+  addStates(addState: (kernel: RuleAt[]) => number): void {
     for (let ruleAt of this.ruleAts) {
       if (ruleAt.read) {
-        this.getActions(ruleAt.read).ruleAts.push(ruleAt.move());
+        const { ruleAts } = this.getActions(ruleAt.read);
+        const moved = ruleAt.move();
+        
+        ruleAts.every(r => !RuleAt.equals(r, moved)) && ruleAts.push(moved);
       } else {
-        ruleAt.context.forEach(symbol =>
-          this.getActions(symbol).reduce.push(grammar.indexOf(ruleAt.rule)),
+        ruleAt.context.forEach(symbol =>(
+          this.getActions(symbol).reduce.push(chalkGrammar.indexOf(ruleAt.rule))),
         );
       }
     }
     
-    for (let actions of this.transitions.values()) {
-      actions.shift = addState(actions.ruleAts);
+    for (let [ symbol, actions ] of this.transitions) {
+      symbol === "" || (actions.shift = addState(actions.ruleAts));
     }
   }
   
@@ -138,8 +170,8 @@ class ParserState {
     return a.ruleAts.every(a => b.ruleAts.some(b => RuleAt.equals(a, b)));
   }
   
-  jsonObject(): JsonObject {
-    const obj: JsonObject = {};
+  jsonObject(): Transition {
+    const obj: Transition = {};
     
     for (let [ symbol, actions ] of this.transitions) {
       obj[symbol] = { shift: actions.shift, reduce: actions.reduce };
@@ -158,23 +190,23 @@ class Main {
     
     this.startTime = Date.now();
     
-    const startSymbols = [ "ChalkModule", "ChalkDocModule" ];
-    
     this.table = startSymbols.map(startSymbol =>
-      new ParserState(chalkGrammar, [ new RuleAt([ "", [ startSymbol ] ], 0, new Set([ "" ])) ]),
+      new ParserState([ new RuleAt([ "", [ startSymbol ] ], 0, new Set([ "" ])) ]),
     );
     
     const addState = this.addState.bind(this);
     
     for (let i = 0; i < this.table.length; i++) {
-      this.table[i].addStates(chalkGrammar, addState);
+      this.table[i].addStates(addState);
+      process.stdout.write("\r\x1b[K" + i + " / 3362 ("
+        + (Math.floor(i / 0.3362) / 100) + "%)");
     }
     
     this.saveFile();
   }
   
-  addState(ruleAts: RuleAt[]): number {
-    const newState = new ParserState(chalkGrammar, ruleAts);
+  addState(kernel: RuleAt[]): number {
+    const newState = new ParserState(kernel);
     const index = this.table.findIndex(state => ParserState.equals(state, newState));
     
     return index === -1 ? this.table.push(newState) - 1 : index;
@@ -183,7 +215,7 @@ class Main {
   async saveFile(): Promise<void> {
     const data = JSON.stringify(this.table.map(state => state.jsonObject()));
     
-    promises.writeFile("./parser-table.json", data);
+    promises.writeFile("out/parser-table.json", data);
     
     console.log("Done: Calculating parser tables. Took " + (Date.now() - this.startTime) + "ms.");
   }
