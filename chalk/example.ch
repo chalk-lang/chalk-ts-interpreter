@@ -18,3 +18,11 @@ class X {
 class Main {
   
 }
+
+Null foo() {
+  A f = A();
+  
+  { a: 3, b } == f;
+  
+  print(a);
+}

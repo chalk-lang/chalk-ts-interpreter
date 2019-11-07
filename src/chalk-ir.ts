@@ -297,18 +297,18 @@ export class Type extends AstNode {
   }
 }
 
-export class Access extends AstNode {
-  access: "mut"|"let"|"cst"|"imt";
+export class Modifier extends AstNode {
+  modifier: "mut"|"let"|"cst"|"imt";
   
-  constructor(access: SimpleToken) {
+  constructor(modifier: SimpleToken) {
     super();
     
-    this.access = access.type as "mut"|"let"|"cst"|"imt";
+    this.modifier = modifier.type as "mut"|"let"|"cst"|"imt";
   }
 }
 
 export class VarDefSkeleton extends AstNode {
-  constructor(ta: Type|Access, it: Identifier|Type, i?: Identifier) {
+  constructor(ta: Type|Modifier, it: Identifier|Type, i?: Identifier) {
     super();
     
     // TODO
@@ -333,7 +333,7 @@ export class Tuple extends AstNode {
 
 export class VarDef extends AstNode {
   constructor(
-    z: VarDefSkeleton|AtomicType|Access,
+    z: VarDefSkeleton|AtomicType|Modifier,
     f: Expr|Tuple|AtomicType,
     s: Tuple
   ) {
@@ -426,6 +426,28 @@ export class FnDef extends AstNode {
     super();
     
     // TODO
+  }
+}
+
+export class AccessS extends AstNode {
+  s: "pub"|"static";
+  
+  constructor(s: SimpleToken) {
+    super();
+    
+    this.s = s.type as "pub"|"static";
+  }
+}
+
+export class Access extends AstNode {
+  pub: boolean;
+  sta: boolean;
+  
+  constructor(s?: AccessS, access?: Access) {
+    super();
+    
+    this.pub = !!access && access.pub || !!s && s.s === "pub";
+    this.sta = !!access && access.sta || !!s && s.s === "static";
   }
 }
 

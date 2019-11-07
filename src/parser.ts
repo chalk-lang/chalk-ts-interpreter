@@ -36,7 +36,7 @@ function goBackN(node: Head, n: number): Head {
   return node;
 }
 
-export async function parse(tokens: Iterator<Token, Token>, startSymbol: string): Promise<ChalkModule> {
+export function parse(tokens: Iterator<Token, Token>, startSymbol: string): ChalkModule {
   const startState: Transition = parserTable[startSymbols.indexOf(startSymbol) ];
   
   let [ oldHeads, heads ]: Head[][] = [ [], [ new Head(null, null, startState) ] ];
@@ -80,8 +80,6 @@ export async function parse(tokens: Iterator<Token, Token>, startSymbol: string)
         ));
       }
     }
-    
-    await new Promise(f => setTimeout(f, 1000));
   }
   
   if (!ast) throw new Error("Cannot parse at "
