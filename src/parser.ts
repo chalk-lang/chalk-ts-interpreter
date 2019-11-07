@@ -19,6 +19,8 @@ class Head {
     public state: Transition
   ) {}
   
+  actions(token: Token) { return this.state[token.type] }
+  
   removeReduces(): Head {
     const transition: Transition = {};
     
@@ -50,12 +52,16 @@ export function parse(tokens: Iterator<Token, Token>, startSymbol: string): Chal
     console.log(oldHeads);
     
     for (let head of oldHeads) {
-      const actions = head.state[(token as Token).type];
+      const actions = head.actions(token);
       console.log("Actions: ", actions);
       if (!actions) continue;
       
       if (actions.shift) {
-        if (actions.reduce.length === 0) {
+        /*/
+          Only read if no heads will reduce in this iteration, otherwise input
+          would become desynchronized.
+        /*/
+        if (oldHeads.every(head => head.actions(token).reduce.length === 0) {
           heads.push(new Head(token, head, parserTable[actions.shift]));
           
           token = tokens.next().value;
