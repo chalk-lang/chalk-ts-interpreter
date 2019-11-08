@@ -21,6 +21,10 @@ class Head {
   
   actions(token: Token) { return this.state[token.type] }
   
+  hasReduces(token: Token) {
+    return this.state[token.type] && this.state[token.type].reduce.length > 0;
+  }
+  
   removeReduces(): Head {
     const transition: Transition = {};
     
@@ -41,31 +45,36 @@ function goBackN(node: Head, n: number): Head {
 export function parse(tokens: Iterator<Token, Token>, startSymbol: string): ChalkModule {
   const startState: Transition = parserTable[startSymbols.indexOf(startSymbol) ];
   
-  let [ oldHeads, heads ]: Head[][] = [ [], [ new Head(null, null, startState) ] ];
-  let token: Token = tokens.next().value;
+  let [ token, tokenNext ]: Token[] = [ tokens.next().value, tokens.next().value ];
+  
+  let [ heads, headsNext ]: Head[][] = [ [], [ new Head(null, null, startState) ] ];
+  let [ doShift, doShiftNext ]: boolean[] = [ false, !headsNext[0].hasReduces(token) ];
   
   let ast: AstNode|null = null;
   
-  while (heads.length > 0) {
-    [ oldHeads, heads ] = [ heads, [] ];
+  while (headsNext.length > 0) {
+    [ heads, headsNext ] = [ headsNext, [] ];
+    [ doShift, doShiftNext ] = [ doShiftNext, true ];
     
-    console.log(oldHeads);
+    console.log("\nStart.");
+    console.log("Tokens:");
+    console.log("  ", token);
+    console.log("  ", tokenNext);
+    console.log("Heads: ", heads);
     
-    for (let head of oldHeads) {
+    for (let head of heads) {
       const actions = head.actions(token);
-      console.log("Actions: ", actions);
+      console.log("Head actions: ", actions);
       if (!actions) continue;
       
       if (actions.shift) {
-        /*/
-          Only read if no heads will reduce in this iteration, otherwise input
-          would become desynchronized.
-        /*/
-        if (oldHeads.every(head => head.actions(token).reduce.length === 0) {
-          heads.push(new Head(token, head, parserTable[actions.shift]));
+        if (doShift) {
+          const newHead = new Head(token, head, parserTable[actions.shift]);
           
-          token = tokens.next().value;
-        } else heads.push(head.removeReduces());
+          newHead.hasReduces(tokenNext) && (doShiftNext = false);
+          
+          headsNext.push(newHead);
+        } else headsNext.push(head.removeReduces());
       }
       
       for (let index of actions.reduce) {
@@ -77,15 +86,19 @@ export function parse(tokens: Iterator<Token, Token>, startSymbol: string): Chal
           continue;
         }
         
-        let prevNode = goBackN(head, chalkGrammar[index][1].length);
+        const prevNode = goBackN(head, chalkGrammar[index][1].length);
         
-        heads.push(new Head(
-          head,
-          prevNode,
+        const newHead = new Head(head, prevNode,
           parserTable[prevNode.state[chalkGrammar[index][0]].shift as number],
-        ));
+        );
+        
+        newHead.hasReduces(token) && (doShiftNext = false);
+        
+        headsNext.push(newHead);
       }
     }
+    
+    doShift && ([ token, tokenNext ] = [ tokenNext, tokens.next().value ]);
   }
   
   if (!ast) throw new Error("Cannot parse at "
