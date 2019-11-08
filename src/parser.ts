@@ -58,8 +58,8 @@ export function parse(tokens: Iterator<Token, Token>, startSymbol: string): Chal
     
     console.log("\nStart.");
     console.log("Tokens:");
-    console.log("  ", token);
-    console.log("  ", tokenNext);
+    console.log(" ", token);
+    console.log(" ", tokenNext);
     console.log("Heads: ", heads);
     
     for (let head of heads) {
@@ -98,7 +98,8 @@ export function parse(tokens: Iterator<Token, Token>, startSymbol: string): Chal
       }
     }
     
-    doShift && ([ token, tokenNext ] = [ tokenNext, tokens.next().value ]);
+    doShift && headsNext.length > 0
+      && ([ token, tokenNext ] = [ tokenNext, tokens.next().value ]);
   }
   
   if (!ast) throw new Error("Cannot parse at "

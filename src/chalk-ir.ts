@@ -397,6 +397,22 @@ export class Params extends AstNode {
   }
 }
 
+export class InitListNext extends AstNode {
+  constructor(name?: Identifier, params?: Params, next?: InitListNext) {
+    super();
+    
+    // TODO
+  }
+}
+
+export class ConstructorInitList extends AstNode {
+  constructor(name?: Identifier, params?: Params, next?: InitListNext) {
+    super();
+    
+    // TODO
+  }
+}
+
 export class ArrowFnDef extends AstNode {
   constructor(mType: MType, i: Identifier|MIdentifier, a: Expr|IdList|Params, b?: Expr) {
     super();
