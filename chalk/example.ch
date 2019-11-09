@@ -26,11 +26,16 @@ Null foo() {
   
   class f = class {};
   
-  A f = A();a;
+  A f = A();;a;
   
   { a: 3, b } == f;
   
   print(a);
+  
+  Null a => 5;
+  
+  Boo() { return 8 }
+  Boo() { return 8; }
   
   for let x = 0; x < 10; x++ {
     mut Int a = 5;

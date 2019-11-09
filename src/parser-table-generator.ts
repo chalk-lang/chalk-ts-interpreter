@@ -210,7 +210,7 @@ class Main {
     for (let i = 0; i < this.table.length; i++) {
       this.table[i].addStates(addState, i);
       
-      const numOfStates = 12931;
+      const numOfStates = 14209;
       
       process.stdout.write("\r\x1b[K" + i + " / " + numOfStates + " ("
         + (Math.floor(i * 10000 / numOfStates) / 100) + "%)");

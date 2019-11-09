@@ -38,9 +38,10 @@ export const chalkGrammar: Grammar =
     [ "AccessS", [ "static" ] ],
     [ "DefExpr", [ "VarDef", ";" ] ],
     [ "DefExpr", [ "ArrowFnDef", ";" ] ],
-    [ "DefExpr", [ "FnDef" ] ],
-    [ "DefExpr", [ "ClassDef" ] ],
-    [ "DefExpr", [ "TraitDef" ] ],
+    [ "DefExpr", [ "DefExprE" ] ],
+    [ "DefExprE", [ "FnDef" ] ],
+    [ "DefExprE", [ "ClassDef" ] ],
+    [ "DefExprE", [ "TraitDef" ] ],
     [ "VarDef", [ "VarDefSkeleton", "=", "Expr" ] ],
     [ "VarDef", [ "VarDefSkeleton", "Tuple" ] ], // TODO should this be allowed?
     [ "VarDef", [ "Modifier", "AtomicType", "Tuple" ] ],
@@ -250,10 +251,9 @@ export const chalkGrammar: Grammar =
     [ "ExprList", [ "Expr" ] ],
     [ "ExprList", [ "Expr", ";" ] ],
     [ "ExprList", [ "Proposition" ] ],
-    [ "ExprList", [ "DefExpr" ] ],
     [ "ExprList", [ "Expr", ";", "ExprList" ] ],
     [ "ExprList", [ "Proposition", "ExprList" ] ],
-    [ "ExprList", [ "DefExpr", "ExprList" ] ],
+    [ "ExprList", [ "DefExprE", "ExprList" ] ],
     [ "BlockOrEmpty", [ "{", "}" ] ],
     [ "BlockOrEmpty", [ "Block" ] ],
     [ "Switch", [ "switch", "MExpr", "{", "Cases", "}" ] ], // Here 0
@@ -265,10 +265,11 @@ export const chalkGrammar: Grammar =
     [ "Case", [ "case", "Expr", ":", "DefExpr" ] ],
     [ "Case", [ "default", ":", "Expr" ] ],
     [ "Case", [ "default", ":", "DefExpr" ] ],
-    [ "For", [ "for", "BlockOrEmpty" ] ],
-    [ "For", [ "for", "Expr", ";", "BlockOrEmpty" ] ],
-    [ "For", [ "for", "Expr", ";", "Expr", ";", "BlockOrEmpty" ] ],
-    [ "For", [ "for", "Expr", ";", "Expr", ";", "Expr", ";", "BlockOrEmpty" ] ],
+    [ "For", [ "for", "BlockOrEmpty", ";" ] ],
+    [ "For", [ "for", "Expr", "BlockOrEmpty", ";" ] ], // `for 10 {}`
+    [ "For", [ "for", "Expr", ";", "BlockOrEmpty", ";" ] ],
+    [ "For", [ "for", "Expr", ";", "Expr", ";", "BlockOrEmpty", ";" ] ],
+    [ "For", [ "for", "Expr", ";", "Expr", ";", "Expr", ";", "BlockOrEmpty", ";" ] ],
     
     [ "Proposition", [ "Proposition" ] ],
     /*

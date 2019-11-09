@@ -467,8 +467,16 @@ export class Access extends AstNode {
   }
 }
 
+export class DefExprE extends AstNode {
+  constructor(public def: FnDef|ClassDef|TraitDef) {
+    super();
+    
+    // TODO
+  }
+}
+
 export class DefExpr extends AstNode {
-  constructor(public def: VarDef|ArrowFnDef|FnDef|ClassDef|TraitDef) {
+  constructor(public def: VarDef|ArrowFnDef|DefExprE) {
     super();
     
     // TODO
