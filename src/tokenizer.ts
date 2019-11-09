@@ -21,12 +21,12 @@ export class EmptyToken extends Token {
 export class SimpleToken extends Token {
   static typesUppercase = [ "All", "Ex", "Exists" ];
   static types =
-    [ "comptime", "import", "ignore", "nowait", "switch", "class", "trait", "await",
-      "type", "case", "mut", "let", "cst", "imt", "any", "<=>", "**=", "<->", "=>",
-      "[]", "||", "&&", "==", "!=", "<=", ">=", "is", "++", "**", "+=", "-=", "*=",
-      "/=", "%=", "<-", "->", ";", "=", "(", ")", "{", "}", "<", ">", "|", "&",
-      "*", ".", ",", "?", ":", "%", "+", "-", "/", "!", "[", "]",
-      ...SimpleToken.typesUppercase,
+    [ "comptime", "import", "ignore", "nowait", "switch", "static", "class",
+      "trait", "await", "type", "case", "mut", "let", "cst", "imt", "any", "<=>",
+      "**=", "<->", "=>", "[]", "||", "&&", "==", "!=", "<=", ">=", "is", "++",
+      "**", "+=", "-=", "*=", "/=", "%=", "<-", "->", ";", "=", "(", ")", "{",
+      "}", "<", ">", "|", "&", "*", ".", ",", "?", ":", "%", "+", "-", "/", "!",
+      "[", "]", ...SimpleToken.typesUppercase,
     ];
   
   constructor(
@@ -128,6 +128,18 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
       continue;
     }
     
+    if (str.substring(i, i + 2) == "//") {
+      i += 2;
+      
+      while (i < str.length && str[i] != "\n") i++;
+      
+      newLine();
+      
+      i++;
+      
+      continue;
+    }
+    
     let match;
     
     if (match = SimpleToken.types.find(symbol => str.substring(i, i + symbol.length) == symbol)) {
@@ -159,18 +171,6 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
       }
       
       yield new NamedToken(name, rowCount, col, name);
-      
-      continue;
-    }
-    
-    if (str.substring(i, i + 2) == "//") {
-      i += 2;
-      
-      while (i < str.length && str[i] != "\n") i++;
-      
-      newLine();
-      
-      i++;
       
       continue;
     }

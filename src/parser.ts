@@ -60,7 +60,7 @@ export function parse(tokens: Iterator<Token, Token>, startSymbol: string): Chal
     console.log("Tokens:");
     console.log(" ", token);
     console.log(" ", tokenNext);
-    console.log("Heads: ", heads);
+    console.log("Heads: " + heads.length);
     
     for (let head of heads) {
       const actions = head.actions(token);

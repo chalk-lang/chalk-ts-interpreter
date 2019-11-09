@@ -5,7 +5,7 @@
 import { a } from "./path";
 
 class X {
-  Int a;
+  //Int a;
   Int b = 5;
   Int c = 0x.Ae2 + 5.8;
   
@@ -20,7 +20,9 @@ class Main {
 }
 
 Null foo() {
-  A f = A();
+  A();
+
+  A f = A();a;;
   
   { a: 3, b } == f;
   

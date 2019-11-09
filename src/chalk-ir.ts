@@ -68,8 +68,8 @@ export class Literal extends AstNode {
 
 export class Unary extends AstNode {
   constructor(
-    zeroth: Unary|NamedToken|Type|Literal|FunctionCall|Block|Switch|For,
-    first: NamedToken|Expr,
+    zeroth: Unary|NamedToken|Type|Literal|Block|Switch|For,
+    first: NamedToken|Expr|Tuple,
   ) {
     super();
     
@@ -573,16 +573,6 @@ export class SetLit extends AstNode {
     f: Expr|VarDefSkeleton,
     rest: SetNext) {
     super();
-    
-    // TODO
-  }
-}
-
-export class FunctionCall extends AstNode {
-  constructor(expr: Expr, args: Tuple) {
-    super();
-    
-    // TODO: if (isAtomicType(expr)) throw new Error("Rejecting wrong parse");
     
     // TODO
   }
