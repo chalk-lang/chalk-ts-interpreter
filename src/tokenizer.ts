@@ -170,7 +170,7 @@ export function* tokenizer(str: string, isChalkDoc: boolean): IterableIterator<T
         name = str.substring(nameStart, i);
       }
       
-      yield new NamedToken(name, rowCount, col, name);
+      yield new NamedToken(match, rowCount, col, name);
       
       continue;
     }

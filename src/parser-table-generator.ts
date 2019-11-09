@@ -85,17 +85,17 @@ function first(symbols: string[]): Set<string> {
 }
 
 class RuleAt {
-  read: string|null;
-  
   constructor(
     public rule: Rule,
     public dot: number,
     public context: Set<string>
-  ) {
-    this.read = rule[1][dot] || null;
-  }
+  ) {}
   
   move(): RuleAt { return new RuleAt(this.rule, this.dot + 1, this.context) }
+  
+  read(): string|null {
+    return this.rule[1][this.dot] || null;
+  }
   
   static equals(a: RuleAt, b: RuleAt): boolean {
     return a.rule === b.rule && a.dot === b.dot && setEquals(a.context, b.context);
@@ -124,8 +124,9 @@ class ParserState {
   addMissingRuleAts(): void {
     for (let i = 0; i < this.ruleAts.length; i++) {
       const ruleAt = this.ruleAts[i];
-
-      if (!ruleAt.read || isTerminal(ruleAt.read)) continue;
+      const read = ruleAt.read();
+      
+      if (!read || isTerminal(read)) continue;
       
       const context = first(ruleAt.rule[1].slice(ruleAt.dot + 1));
       
@@ -136,7 +137,7 @@ class ParserState {
       }
       
       chalkGrammar.forEach(r => {
-        if (r[0] !== ruleAt.read) return;
+        if (r[0] !== read) return;
         
         const missing = new RuleAt(r, 0, context);
         
@@ -155,8 +156,10 @@ class ParserState {
   
   addStates(addState: (kernel: RuleAt[]) => number, index: number): void {
     for (let ruleAt of this.ruleAts) {
-      if (ruleAt.read) {
-        const { ruleAts } = this.getActions(ruleAt.read);
+      const read = ruleAt.read();
+      
+      if (read) {
+        const { ruleAts } = this.getActions(read);
         const moved = ruleAt.move();
         
         ruleAts.every(r => !RuleAt.equals(r, moved)) && ruleAts.push(moved);
@@ -207,7 +210,7 @@ class Main {
     for (let i = 0; i < this.table.length; i++) {
       this.table[i].addStates(addState, i);
       
-      const numOfStates = 4356;
+      const numOfStates = 12931;
       
       process.stdout.write("\r\x1b[K" + i + " / " + numOfStates + " ("
         + (Math.floor(i * 10000 / numOfStates) / 100) + "%)");

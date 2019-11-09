@@ -21,10 +21,18 @@ class Main {
 
 Null foo() {
   A();
-
-  A f = A();a;;
+  
+  a;
+  
+  class f = class {};
+  
+  A f = A();a;
   
   { a: 3, b } == f;
   
   print(a);
+  
+  for let x = 0; x < 10; x++ {
+    mut Int a = 5;
+  };
 }

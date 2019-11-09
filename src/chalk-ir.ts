@@ -511,6 +511,14 @@ export class GenericParams extends AstNode {
   }
 }
 
+export class ClassDefStart extends AstNode {
+  constructor(name?: NamedToken, params?: GenericParams, eextends?: IdList) {
+    super()
+    
+    // TODO
+  }
+}
+
 export class ClassDef extends AstNode {
   constructor(name: NamedToken, params: GenericParams, defs: DefExprs) {
     super();

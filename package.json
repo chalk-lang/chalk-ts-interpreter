@@ -8,7 +8,7 @@
   "main": "out/main.js",
   "scripts": {
     "build": "rm -r ./out \n tsc",
-    "tables": "node ./out/parser-table-generator.js",
+    "tables": "node --max_old_space_size=6144 ./out/parser-table-generator.js",
     "run": "node ./out/main.js"
   },
   "repository": {
