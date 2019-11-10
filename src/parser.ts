@@ -65,6 +65,7 @@ export function parse(tokens: Iterator<Token, Token>, startSymbol: string): Chal
     for (let head of heads) {
       const actions = head.actions(token);
       console.log("Head actions: ", actions);
+      //console.log("Head: ", head);
       if (!actions) continue;
       
       if (actions.shift) {

@@ -22,7 +22,7 @@ export class SimpleToken extends Token {
   static typesUppercase = [ "All", "Ex", "Exists" ];
   static types =
     [ "comptime", "import", "ignore", "nowait", "switch", "static", "class",
-      "trait", "await", "type", "case", "mut", "let", "cst", "imt", "any", "<=>",
+      "trait", "await", "type", "case", "mut", "let", "cst", "imt", "pub", "<=>",
       "**=", "<->", "=>", "[]", "||", "&&", "==", "!=", "<=", ">=", "is", "++",
       "**", "+=", "-=", "*=", "/=", "%=", "<-", "->", ";", "=", "(", ")", "{",
       "}", "<", ">", "|", "&", "*", ".", ",", "?", ":", "%", "+", "-", "/", "!",
