@@ -1,4 +1,4 @@
-import { getChalkTokenizer } from "./tokenizer";
+import { getChalkTokenizer } from './tokenizer';
 
 (async() => {
   const t = await getChalkTokenizer();

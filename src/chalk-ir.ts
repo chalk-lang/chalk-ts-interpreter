@@ -2,14 +2,14 @@
   Defines the internal representation of Chalk source code.
 /*/
 
-import * as Path from "path";
+import * as Path from 'path';
 
 import {
   SimpleToken,
   NamedToken,
   StringToken,
   NumberToken
-} from "./tokenizer";
+} from './tokenizer';
 
 export class AstNode {}
 
@@ -655,7 +655,7 @@ export class For extends AstNode {
   }
 }
 
-export class ChalkModule extends AstNode {
+export class ChalkScript extends AstNode {
   importPaths = new Set<string>();
   path: string|null = null;
   

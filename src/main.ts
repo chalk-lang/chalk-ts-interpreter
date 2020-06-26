@@ -1,17 +1,17 @@
 // Entry point of the interpreter.
 
-import { promises } from "fs";
-import * as Path from "path";
+import { promises } from 'fs';
+import * as Path from 'path';
 
-import { parse } from "./parser";
-import { ChalkModule } from "./chalk-ir";
-import { tokenizer } from "./tokenizer";
+import { parse } from './parser';
+import { ChalkModule } from './chalk-ir';
+import { tokenizer } from './tokenizer';
 
 class Main {
   modules: Map<string, ChalkModule> = new Map();
   loadingPaths = new Map<string, Promise<unknown>>();
   
-  constructor({ mainPath }: { mainPath: string }) {
+  constructor({ mainPath }: { mainPath: string, args: string[] }) {
     const path = Path.normalize(mainPath);
     
     if (path[0] === ".") throw new Error("Cannot import path \"" + path);
@@ -22,8 +22,8 @@ class Main {
   async loadModule(path: string) {
     const ext = Path.extname(path);
     const obj: { [key: string]: { symbol: string, isDoc: boolean } } =
-      { ".ch": { symbol: "ChalkModule", isDoc: false },
-        ".chdoc": { symbol: "ChalkDocModule", isDoc: true },
+      { ".chs": { symbol: "ChalkScript", isDoc: false },
+        ".chdoc": { symbol: "ChalkDoc", isDoc: true },
       };
     
     if (!obj[ext]) throw new Error("Unknown extension \"" + ext + "\" of file: "
@@ -50,4 +50,4 @@ class Main {
 
 if (!process.argv[2]) throw new Error("Argument expected (program entry point)");
 
-new Main({ mainPath: process.argv[2] });
+new Main({ mainPath: process.argv[2], args: process.argv.slice(3) });

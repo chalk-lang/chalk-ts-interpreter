@@ -2,7 +2,7 @@
   A comment.
 ///
 
-import { a } from "./path";
+import { a } from './path';
 
 class X {
   Int a;

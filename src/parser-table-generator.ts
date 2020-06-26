@@ -2,9 +2,9 @@
   Creates tables for parser of Chalk.
 /*/
 
-import { promises } from "fs";
+import { promises } from 'fs';
 
-import { Rule, isTerminal, chalkGrammar, startSymbols } from "./grammar";
+import { Rule, isTerminal, chalkGrammar, startSymbols } from './grammar';
 
 export interface Transition {
   [key: string]: {

@@ -2,12 +2,12 @@
   A parser generator loosely based on LR parser.
 /*/
 
-import { Grammar, startSymbols, chalkGrammar } from "./grammar";
-import { Token, EmptyToken } from "./tokenizer";
-import { Transition } from "./parser-table-generator";
-import { ChalkModule, AstNode } from "./chalk-ir";
+import { Grammar, startSymbols, chalkGrammar } from './grammar';
+import { Token, EmptyToken } from './tokenizer';
+import { Transition } from './parser-table-generator';
+import { ChalkModule, AstNode } from './chalk-ir';
 
-import * as parserTableU from "./parser-table.json";
+import * as parserTableU from './parser-table.json';
 const parserTable: Transition[] = parserTableU;
 
 const emptyArr: never[] = [];

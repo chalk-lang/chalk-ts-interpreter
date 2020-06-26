@@ -12,7 +12,7 @@
   I'm not touching this grammar again unless I absolutely have to.
 /*/
 
-import * as Rules from "./chalk-ir";
+import * as Rules from './chalk-ir';
 
 export type Rule = [string, string[]];
 
@@ -22,10 +22,10 @@ export function isTerminal(symbol: string): boolean {
   return !symbol.match(/^[A-Z]/);
 }
 
-export const startSymbols = [ "ChalkModule", "ChalkDocModule" ];
+export const startSymbols = [ "ChalkScript", "ChalkDoc" ];
 
 export const chalkGrammar: Grammar =
-  [ [ "ChalkModule", [ "Imports", "ExprList" ] ],
+  [ [ "ChalkScript", [ "Imports", "ExprList" ] ],
     [ "Imports", [ "Import", "Imports" ] ],
     [ "Imports", [] ],
     [ "Import", [ "import", "ImportWhat", "lIdentifier", "string", ";" ] ],
@@ -271,7 +271,7 @@ export const chalkGrammar: Grammar =
     [ "JSON", [] ], // TODO
     [ "ChalkDoc", [] ], // TODO
     
-    [ "ChalkDocModule", [] ],
+    [ "ChalkDoc", [] ],
     */
   ];
 

@@ -13,14 +13,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chalk-lang/chalk-ts-interpreter.git"
+    "url": "git+https://github.com/chalk-lang/ts-interpreter.git"
   },
   "author": "Jozef Mikušinec <mik.jozef@gmail.com> (mikusinec.com)",
-  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chalk-lang/chalk-ts-interpreter/issues"
+    "url": "https://github.com/chalk-lang/ts-interpreter/issues"
   },
-  "homepage": "https://github.com/chalk-lang/chalk-ts-interpreter#readme",
+  "homepage": "https://github.com/chalk-lang/ts-interpreter#readme",
   "devDependencies": {},
   "dependencies": {
     "@types/node": "^12.7.11"
